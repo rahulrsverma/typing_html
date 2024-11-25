@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed and Accuracy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: none;
+    }
+    #codeDisplay {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 16px;
+    }
+    #results {
+      margin-top: 20px;
+    }
+    .result {
+      margin: 10px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    button {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #timer {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Typing Speed and Accuracy Test</h1>
+    <p>Paste your code snippet below:</p>
+    <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+    <button id="startButton">Start Typing Test</button>
+
+    <div id="timer" style="display: none;">Time Remaining: 1:00</div>
+    <div id="codeDisplay" style="display: none;"></div>
+    <textarea id="typingArea" placeholder="Start typing here..." style="display: none;"></textarea>
+    <button id="finishButton" style="display: none;">Finish Test</button>
+
+    <div id="results" style="display: none;">
+      <div class="result" id="speedResult"></div>
+      <div class="result" id="accuracyResult"></div>
+    </div>
+  </div>
+
+  <script>
+    const codeInput = document.getElementById("codeInput");
+    const startButton = document.getElementById("startButton");
+    const codeDisplay = document.getElementById("codeDisplay");
+    const typingArea = document.getElementById("typingArea");
+    const finishButton = document.getElementById("finishButton");
+    const results = document.getElementById("results");
+    const speedResult = document.getElementById("speedResult");
+    const accuracyResult = document.getElementById("accuracyResult");
+    const timer = document.getElementById("timer");
+
+    let startTime, codeText, countdownInterval, timeLeft = 60;
+
+    const endTest = () => {
+      clearInterval(countdownInterval);
+      const endTime = new Date(); // End timing
+      const typedText = typingArea.value.trim();
+      const timeTaken = Math.max((60 - timeLeft), 1); // Ensure no division by 0
+      const wordsTyped = typedText.split(/\s+/).length;
+      const speed = Math.round((wordsTyped / timeTaken) * 60); // Words per minute
+
+      // Calculate accuracy
+      const originalWords = codeText.split(/\s+/);
+      const typedWords = typedText.split(/\s+/);
+      let correctWords = 0;
+
+      originalWords.forEach((word, index) => {
+        if (word === typedWords[index]) correctWords++;
+      });
+
+      const accuracy = ((correctWords / originalWords.length) * 100).toFixed(2);
+
+      // Display results
+      speedResult.textContent = `Typing Speed: ${speed} WPM`;
+      accuracyResult.textContent = `Accuracy: ${accuracy}%`;
+      results.style.display = "block";
+
+      // Reset test
+      finishButton.style.display = "none";
+      typingArea.style.display = "none";
+      codeDisplay.style.display = "none";
+      codeInput.style.display = "block";
+      startButton.style.display = "block";
+      timer.style.display = "none";
+      timeLeft = 60; // Reset timer
+    };
+
+    const updateTimer = () => {
+      if (timeLeft <= 0) {
+        endTest();
+      } else {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timer.textContent = `Time Remaining: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      }
+    };
+
+    startButton.addEventListener("click", () => {
+      codeText = codeInput.value.trim();
+      if (!codeText) {
+        alert("Please paste some code to start the test.");
+        return;
+      }
+
+      // Display the code and show the typing area
+      codeDisplay.textContent = codeText;
+      codeDisplay.style.display = "block";
+      typingArea.style.display = "block";
+      finishButton.style.display = "block";
+      codeInput.style.display = "none";
+      startButton.style.display = "none";
+      timer.style.display = "block";
+
+      typingArea.value = "";
+      typingArea.focus();
+      startTime = new Date(); // Start timing
+      countdownInterval = setInterval(updateTimer, 1000); // Start timer
+    });
+
+    finishButton.addEventListener("click", endTest);
+  </script>
+</body>
+</html>
